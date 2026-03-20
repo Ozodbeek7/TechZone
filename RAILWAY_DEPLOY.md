@@ -42,7 +42,7 @@ Set these Railway environment variables:
 
 Set:
 
-- `REACT_APP_API_URL=<backend-public-url>` (with or without `/api`; the app normalizes it)
+- `REACT_APP_API_URL=<backend-public-url>` — you may omit `https://` (e.g. `my-backend.up.railway.app`); the frontend now prepends `https://` so API calls do not hit the static host as a bogus path like `/my-backend.../categories`.
 
 **Critical:** Create React App bakes `REACT_APP_*` at **build** time. Add `REACT_APP_API_URL` as a service variable and include it in the **Docker build** (Railway UI: variable → “Add to Dockerfile” / build-time), then redeploy so the image rebuilds. The `Dockerfile` declares `ARG REACT_APP_API_URL` for this. Example value: `https://your-backend-service.up.railway.app`. If it is missing at build time, the SPA falls back to relative `/api` on the frontend host — API calls will fail.
 

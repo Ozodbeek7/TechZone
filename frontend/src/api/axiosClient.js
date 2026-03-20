@@ -13,13 +13,35 @@ function resolveApiBaseUrl() {
   const raw = (process.env.REACT_APP_API_URL || "").trim();
   if (!raw) return "/api";
 
-  // If a full host URL is provided without "/api", append it.
-  if (/^https?:\/\//i.test(raw)) {
-    const normalized = raw.replace(/\/+$/, "");
-    return normalized.endsWith("/api") ? normalized : `${normalized}/api`;
+  // Same-origin path (e.g. CRA dev proxy / nginx): must include /api if that is your mount.
+  if (raw.startsWith("/")) {
+    return raw.replace(/\/+$/, "") || "/api";
   }
 
-  return raw;
+  let url = raw;
+  if (url.startsWith("//")) {
+    url = `https:${url}`;
+  }
+
+  // Railway misconfigs often omit the scheme; axios then treats the host as a *path* on the
+  // frontend origin (see logs: GET /techzone-production-....railway.app/categories).
+  if (!/^https?:\/\//i.test(url)) {
+    const isLocal =
+      /^localhost\b/i.test(url) || /^127\.\d+\.\d+\.\d+\b/.test(url);
+    if (
+      isLocal ||
+      /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}/i.test(url)
+    ) {
+      url = `${isLocal ? "http://" : "https://"}${url}`;
+    }
+  }
+
+  if (!/^https?:\/\//i.test(url)) {
+    return raw;
+  }
+
+  const normalized = url.replace(/\/+$/, "");
+  return normalized.endsWith("/api") ? normalized : `${normalized}/api`;
 }
 
 const API_BASE_URL = resolveApiBaseUrl();
