@@ -9,4 +9,5 @@ watchPatterns = ["backend/**"]
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
-preDeployCommand = ["flask", "db", "upgrade"]
+# Railway allows only a single pre-deploy command (one string or one array element).
+preDeployCommand = "flask db upgrade"
