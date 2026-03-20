@@ -1,0 +1,409 @@
+"""
+Demo catalog for TechZone — products with Unsplash images and specs.
+Run via `flask seed` (skipped if products already exist).
+"""
+from __future__ import annotations
+
+import click
+
+from .extensions import db
+from .models.product import Category, Brand, Product
+from .services.product_service import ProductService
+
+# Stable Unsplash CDN URLs (electronics-themed)
+U = "https://images.unsplash.com"
+_Q = "?auto=format&fit=crop&w=900&q=80"
+
+IMG = {
+    "laptop1": f"{U}/photo-1496181133206-80ce9b88a853{_Q}",
+    "laptop2": f"{U}/photo-1525547719571-a2d4ac8945e2{_Q}",
+    "laptop3": f"{U}/photo-1517336714731-489689fd1ca8{_Q}",
+    "phone1": f"{U}/photo-1511707171634-5f897ff02aa9{_Q}",
+    "phone2": f"{U}/photo-1592750475338-74b7b21085ab{_Q}",
+    "tablet1": f"{U}/photo-1544244015-0df4b3ffc6b0{_Q}",
+    "monitor1": f"{U}/photo-1527443224154-c4a3942d3acf{_Q}",
+    "monitor2": f"{U}/photo-1585792180666-f7347c490ee2{_Q}",
+    "headphones1": f"{U}/photo-1505740420928-5e560c06d30e{_Q}",
+    "headphones2": f"{U}/photo-1484704849700-f032a568e944{_Q}",
+    "camera1": f"{U}/photo-1516035069371-29a1b244cc32{_Q}",
+    "gaming1": f"{U}/photo-1606144042614-b2417e99c4e3{_Q}",
+    "gpu1": f"{U}/photo-1591488320449-011701bb6704{_Q}",
+    "ssd1": f"{U}/photo-1597872200965-2b25b3d0f942{_Q}",
+    "router1": f"{U}/photo-1633410189422-1fa99d671389{_Q}",
+    "keyboard1": f"{U}/photo-1587829741301-dc798b83add3{_Q}",
+    "mouse1": f"{U}/photo-1527814050087-3793815479db{_Q}",
+    "watch1": f"{U}/photo-1523275335684-37898b6baf30{_Q}",
+    "speaker1": f"{U}/photo-1608043152269-423dbba4e7e1{_Q}",
+    "webcam1": f"{U}/photo-1587826080690-27bfeffb7a4b{_Q}",
+}
+
+
+def _imgs(*keys: str, alts: list[str] | None = None) -> list[dict]:
+    out = []
+    for i, k in enumerate(keys):
+        out.append(
+            {
+                "url": IMG[k],
+                "alt_text": (alts[i] if alts and i < len(alts) else k.replace("_", " ")),
+                "is_primary": i == 0,
+                "sort_order": i,
+            }
+        )
+    return out
+
+
+# category_slug, brand_slug, name, sku, price, compare, stock, featured, short, desc, images keys, specs
+_CATALOG = [
+    (
+        "laptops",
+        "apple",
+        "MacBook Pro 16 M3 Pro",
+        "TZ-MBP-16-M3P",
+        2499.0,
+        2799.0,
+        24,
+        True,
+        "16\" Liquid Retina XDR, M3 Pro, 18GB RAM, 512GB SSD.",
+        "Apple’s pro laptop for developers and creatives with all-day battery and silent operation.",
+        ("laptop1", "laptop3"),
+        [
+            {"group": "Performance", "key": "Chip", "value": "Apple M3 Pro"},
+            {"group": "Memory", "key": "Unified memory", "value": "18 GB"},
+            {"group": "Storage", "key": "SSD", "value": "512 GB"},
+            {"group": "Display", "key": "Size", "value": '16.2" XDR'},
+        ],
+    ),
+    (
+        "laptops",
+        "dell",
+        "Dell XPS 15 OLED",
+        "TZ-DELL-XPS15",
+        1899.99,
+        2099.99,
+        18,
+        True,
+        "15.6\" OLED, Intel Core Ultra 7, RTX 4050, 16GB RAM.",
+        "Premium Windows ultrabook with vibrant OLED and aluminum chassis.",
+        ("laptop2", "laptop1"),
+        [
+            {"group": "CPU", "key": "Processor", "value": "Intel Core Ultra 7 155H"},
+            {"group": "GPU", "key": "Graphics", "value": "NVIDIA RTX 4050"},
+            {"group": "Display", "key": "Panel", "value": "15.6\" 3.5K OLED"},
+        ],
+    ),
+    (
+        "smartphones",
+        "samsung",
+        "Samsung Galaxy S24 Ultra",
+        "TZ-SGS24U-512",
+        1199.0,
+        1299.0,
+        40,
+        True,
+        "6.8\" AMOLED, Snapdragon 8 Gen 3, S Pen, 512GB.",
+        "Flagship Android with 200MP camera system and titanium frame.",
+        ("phone1", "phone2"),
+        [
+            {"group": "Display", "key": "Size", "value": '6.8" QHD+ AMOLED'},
+            {"group": "Camera", "key": "Main", "value": "200 MP"},
+            {"group": "Battery", "key": "Capacity", "value": "5000 mAh"},
+        ],
+    ),
+    (
+        "smartphones",
+        "apple",
+        "iPhone 15 Pro",
+        "TZ-IPH15P-256",
+        999.0,
+        1099.0,
+        55,
+        True,
+        "6.1\" ProMotion, A17 Pro, titanium, 256GB.",
+        "Compact pro iPhone with USB-C and Action button.",
+        ("phone2", "phone1"),
+        [
+            {"group": "Chip", "key": "SoC", "value": "A17 Pro"},
+            {"group": "Build", "key": "Frame", "value": "Titanium"},
+        ],
+    ),
+    (
+        "tablets",
+        "apple",
+        "iPad Pro 13 M4",
+        "TZ-IPADP-13-M4",
+        1299.0,
+        None,
+        15,
+        False,
+        "13\" Ultra Retina XDR, M4 chip, 256GB.",
+        "Largest iPad Pro for artists and multitaskers.",
+        ("tablet1", "laptop3"),
+        [
+            {"group": "Display", "key": "Size", "value": '13" XDR'},
+            {"group": "Chip", "key": "Processor", "value": "Apple M4"},
+        ],
+    ),
+    (
+        "monitors",
+        "lg",
+        "LG UltraGear 32\" 4K 144Hz",
+        "TZ-LG-32GQ950",
+        899.0,
+        1049.0,
+        22,
+        True,
+        "32\" Nano IPS, 4K, 144Hz, HDR600, HDMI 2.1.",
+        "Gaming monitor with vivid colors and low latency.",
+        ("monitor1", "monitor2"),
+        [
+            {"group": "Panel", "key": "Type", "value": "Nano IPS"},
+            {"group": "Refresh", "key": "Rate", "value": "144 Hz"},
+        ],
+    ),
+    (
+        "monitors",
+        "asus",
+        "ASUS ProArt 27\" 4K",
+        "TZ-PA279CRV",
+        649.0,
+        None,
+        30,
+        False,
+        "27\" 4K IPS, 99% DCI-P3, USB-C 96W.",
+        "Color-accurate display for photo and video work.",
+        ("monitor2", "monitor1"),
+        [
+            {"group": "Color", "key": "Coverage", "value": "99% DCI-P3"},
+        ],
+    ),
+    (
+        "headphones",
+        "sony",
+        "Sony WH-1000XM5",
+        "TZ-SONY-XM5",
+        349.0,
+        399.0,
+        60,
+        True,
+        "Industry-leading noise canceling, 30h battery, multipoint.",
+        "Comfortable over-ear ANC headphones for travel and focus.",
+        ("headphones1", "headphones2"),
+        [
+            {"group": "Audio", "key": "ANC", "value": "Yes"},
+            {"group": "Battery", "key": "Playback", "value": "Up to 30 h"},
+        ],
+    ),
+    (
+        "headphones",
+        "bose",
+        "Bose QuietComfort Ultra",
+        "TZ-BOSE-QCU",
+        379.0,
+        None,
+        35,
+        False,
+        "Spatial audio, premium ANC, 24h battery.",
+        "Immersive listening with Bose spatial processing.",
+        ("headphones2", "headphones1"),
+        [],
+    ),
+    (
+        "cameras",
+        "sony",
+        "Sony Alpha 7 IV Body",
+        "TZ-A7IV-BODY",
+        2498.0,
+        2698.0,
+        12,
+        True,
+        "33MP full-frame, 4K 60p, 5-axis IBIS.",
+        "Hybrid stills/video camera for creators.",
+        ("camera1", "laptop2"),
+        [
+            {"group": "Sensor", "key": "Resolution", "value": "33 MP full-frame"},
+        ],
+    ),
+    (
+        "gaming",
+        "asus",
+        "ASUS ROG Ally Z1 Extreme",
+        "TZ-ROG-ALLY-Z1E",
+        599.0,
+        699.0,
+        28,
+        True,
+        "Handheld PC gaming, 7\" 120Hz, 512GB.",
+        "Windows handheld for Steam and Game Pass on the go.",
+        ("gaming1", "tablet1"),
+        [
+            {"group": "APU", "key": "Processor", "value": "AMD Z1 Extreme"},
+        ],
+    ),
+    (
+        "components",
+        "nvidia",
+        "NVIDIA GeForce RTX 4070 Super",
+        "TZ-RTX4070S",
+        599.0,
+        649.0,
+        8,
+        True,
+        "12GB GDDR6X, DLSS 3, ray tracing.",
+        "1440p gaming GPU with excellent efficiency.",
+        ("gpu1", "ssd1"),
+        [
+            {"group": "Memory", "key": "VRAM", "value": "12 GB GDDR6X"},
+        ],
+    ),
+    (
+        "storage",
+        "samsung",
+        "Samsung 990 PRO 2TB NVMe",
+        "TZ-990PRO-2TB",
+        179.99,
+        219.99,
+        100,
+        False,
+        "PCIe 4.0, 7450 MB/s read, heatsink option.",
+        "Fast SSD for OS, games, and content libraries.",
+        ("ssd1", "gpu1"),
+        [
+            {"group": "Interface", "key": "PCIe", "value": "Gen 4 x4"},
+        ],
+    ),
+    (
+        "networking",
+        "asus",
+        "ASUS RT-AX86U Pro",
+        "TZ-RT-AX86UP",
+        249.0,
+        279.0,
+        45,
+        True,
+        "Wi-Fi 6, dual 2.5G ports, gaming prioritization.",
+        "High-performance router for low-latency gaming.",
+        ("router1", "webcam1"),
+        [
+            {"group": "Wireless", "key": "Wi-Fi", "value": "Wi-Fi 6 (802.11ax)"},
+        ],
+    ),
+    (
+        "components",
+        "asus",
+        "ASUS ROG Strix Scope II Keyboard",
+        "TZ-KB-SCOPE2",
+        149.99,
+        None,
+        70,
+        False,
+        "Hot-swappable NX switches, sound dampening, RGB.",
+        "Mechanical gaming keyboard with premium typing feel.",
+        ("keyboard1", "mouse1"),
+        [],
+    ),
+    (
+        "gaming",
+        "logitech",
+        "Logitech G Pro X Superlight 2",
+        "TZ-GPXSL2",
+        159.0,
+        179.0,
+        85,
+        False,
+        "60g wireless esports mouse, 32k DPI sensor.",
+        "Trusted by pros for FPS and competitive play.",
+        ("mouse1", "keyboard1"),
+        [],
+    ),
+    (
+        "smartphones",
+        "samsung",
+        "Samsung Galaxy Watch 6 Classic",
+        "TZ-GW6C-47",
+        399.0,
+        None,
+        42,
+        False,
+        "47mm rotating bezel, Wear OS, health sensors.",
+        "Premium smartwatch with classic analog aesthetic.",
+        ("watch1", "phone1"),
+        [],
+    ),
+    (
+        "headphones",
+        "sony",
+        "Sony SRS-XB100 Speaker",
+        "TZ-SRS-XB100",
+        59.99,
+        None,
+        120,
+        False,
+        "Portable Bluetooth, IP67, 16h battery.",
+        "Punchy bass in a compact waterproof body.",
+        ("speaker1", "headphones1"),
+        [],
+    ),
+    (
+        "components",
+        "logitech",
+        "Logitech Brio 4K Webcam",
+        "TZ-BRIO4K",
+        159.0,
+        199.0,
+        55,
+        False,
+        "4K HDR, auto light, noise-canceling mics.",
+        "Pro webcam for streaming and meetings.",
+        ("webcam1", "monitor1"),
+        [],
+    ),
+]
+
+
+def seed_catalog_products() -> int:
+    """Insert demo products if table is empty. Returns count created."""
+    if Product.query.count() > 0:
+        return 0
+
+    created = 0
+    for row in _CATALOG:
+        (
+            cat_slug,
+            brand_slug,
+            name,
+            sku,
+            price,
+            compare,
+            stock,
+            featured,
+            short_desc,
+            desc,
+            img_keys,
+            specs,
+        ) = row
+
+        cat = Category.query.filter_by(slug=cat_slug).first()
+        brand = Brand.query.filter_by(slug=brand_slug).first()
+        if not cat or not brand:
+            click.echo(f"  Skip (missing cat/brand): {name}")
+            continue
+
+        data = {
+            "name": name,
+            "sku": sku,
+            "description": desc,
+            "short_description": short_desc,
+            "price": float(price),
+            "compare_at_price": float(compare) if compare else None,
+            "stock_quantity": stock,
+            "is_featured": featured,
+            "category_id": cat.id,
+            "brand_id": brand.id,
+            "images": _imgs(*img_keys),
+            "specifications": specs,
+        }
+        ProductService.create_product(data)
+        created += 1
+        click.echo(f"  Product: {name}")
+
+    return created

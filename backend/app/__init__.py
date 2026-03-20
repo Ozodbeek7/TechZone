@@ -158,6 +158,7 @@ def _register_cli_commands(app: Flask) -> None:
             {"name": "LG", "slug": "lg", "description": "Electronics and home appliances"},
             {"name": "Bose", "slug": "bose", "description": "Audio equipment and speakers"},
             {"name": "NVIDIA", "slug": "nvidia", "description": "GPUs and AI computing"},
+            {"name": "Logitech", "slug": "logitech", "description": "Peripherals and streaming gear"},
         ]
 
         for brand_data in brands_data:
@@ -168,6 +169,30 @@ def _register_cli_commands(app: Flask) -> None:
                 click.echo(f"  Created brand: {brand_data['name']}")
 
         db.session.commit()
+
+        # Demo customer (password meets app validation rules)
+        customer = User.query.filter_by(email="customer@techzone.com").first()
+        if not customer:
+            customer = User(
+                email="customer@techzone.com",
+                username="customer",
+                first_name="Demo",
+                last_name="Customer",
+                role="customer",
+            )
+            customer.set_password("Customer123!")
+            db.session.add(customer)
+            db.session.commit()
+            click.echo("  Created customer (customer@techzone.com / Customer123!)")
+
+        from .seed_catalog import seed_catalog_products
+
+        n = seed_catalog_products()
+        if n:
+            click.echo(f"  Seeded {n} demo products with images.")
+        else:
+            click.echo("  Products already present — skipped catalog seed.")
+
         click.echo("Database seeded successfully.")
 
     @app.cli.command("create-index")

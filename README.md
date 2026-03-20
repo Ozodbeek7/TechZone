@@ -249,10 +249,13 @@ techzone/
    docker-compose exec backend flask db upgrade
    ```
 
-5. **Seed the database with initial data (optional):**
+5. **Seed the database with initial data (categories, brands, demo users, ~19 products with images):**
    ```bash
    docker-compose exec backend flask seed
    ```
+   - Admin: `admin@techzone.com` / `Admin123!`
+   - Customer demo: `customer@techzone.com` / `Customer123!`
+   Re-run does not duplicate products (catalog seed runs only when the products table is empty).
 
 6. **Access the application:**
    - Frontend: http://localhost

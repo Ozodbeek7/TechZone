@@ -182,6 +182,7 @@ export const { logout, clearAuthError } = authSlice.actions;
 export const selectUser = (state) => state.auth.user;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
 export const selectAuthLoading = (state) => state.auth.loading;
+export const selectProfileLoading = (state) => state.auth.profileLoading;
 export const selectAuthError = (state) => state.auth.error;
 export const selectIsAdmin = (state) => state.auth.user?.role === "admin";
 

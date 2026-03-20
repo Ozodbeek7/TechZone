@@ -52,7 +52,7 @@ Backend `CORS_ORIGINS` must match the exact frontend URL (scheme + host, no trai
 
 - Open backend URL and verify `GET /health` returns `{"status":"ok"}`.
 - Open backend URL and verify `/api/products` returns JSON with an `items` array (may be empty until you add data).
-- **Empty catalog:** from a shell attached to the backend service (or locally with `DATABASE_URL` set), run `flask seed` to create categories, brands, and an admin user — then add products via API/admin or your own seed step.
+- **Empty catalog:** run `flask seed` once (Railway: open a shell on the backend service, `cd` to app dir if needed, `flask seed`). This creates categories, brands, **~19 demo products with Unsplash images**, admin `admin@techzone.com` / `Admin123!`, and customer `customer@techzone.com` / `Customer123!`. Catalog products are skipped if the `products` table is already non-empty.
 - Open frontend URL and verify product list loads.
 - Verify login/register requests hit backend domain (network tab).
 - Confirm backend `CORS_ORIGINS` exactly includes frontend URL.

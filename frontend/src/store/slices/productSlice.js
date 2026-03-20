@@ -265,6 +265,7 @@ export const selectFilters = (state) => state.products.filters;
 export const selectCurrentProduct = (state) => state.products.currentProduct;
 export const selectDetailLoading = (state) => state.products.detailLoading;
 export const selectCategories = (state) => state.products.categories;
+export const selectCategoriesLoading = (state) => state.products.categoriesLoading;
 export const selectBrands = (state) => state.products.brands;
 export const selectSearchResults = (state) => state.products.searchResults;
 export const selectSearchLoading = (state) => state.products.searchLoading;

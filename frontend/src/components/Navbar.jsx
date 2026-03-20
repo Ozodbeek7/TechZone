@@ -13,11 +13,13 @@ import {
   FaSignOutAlt,
   FaBars,
   FaTimes,
+  FaMoon,
+  FaSun,
 } from "react-icons/fa";
 
 import { selectIsAuthenticated, selectUser, logout } from "../store/slices/authSlice";
 import { selectCartItemCount } from "../store/slices/cartSlice";
-import useDebounce from "../hooks/useDebounce";
+import { selectThemeMode, toggleTheme } from "../store/slices/themeSlice";
 
 export default function Navbar() {
   const dispatch = useDispatch();
@@ -26,6 +28,7 @@ export default function Navbar() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
   const cartItemCount = useSelector(selectCartItemCount);
+  const themeMode = useSelector(selectThemeMode);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -92,6 +95,16 @@ export default function Navbar() {
               <span className="navbar__cart-badge">{cartItemCount}</span>
             )}
           </Link>
+
+          <button
+            type="button"
+            className="navbar__theme-btn"
+            onClick={() => dispatch(toggleTheme())}
+            aria-label={themeMode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={themeMode === "dark" ? "Light mode" : "Dark mode"}
+          >
+            {themeMode === "dark" ? <FaSun /> : <FaMoon />}
+          </button>
 
           {/* Auth links */}
           {isAuthenticated ? (
