@@ -183,14 +183,15 @@ const productSlice = createSlice({
     });
     builder.addCase(fetchProducts.fulfilled, (state, action) => {
       state.loading = false;
-      state.items = action.payload.items;
+      const payload = action.payload || {};
+      state.items = Array.isArray(payload.items) ? payload.items : [];
       state.pagination = {
-        page: action.payload.page,
-        per_page: action.payload.per_page,
-        total: action.payload.total,
-        pages: action.payload.pages,
-        has_next: action.payload.has_next,
-        has_prev: action.payload.has_prev,
+        page: Number.isInteger(payload.page) ? payload.page : 1,
+        per_page: Number.isInteger(payload.per_page) ? payload.per_page : 20,
+        total: Number.isInteger(payload.total) ? payload.total : state.items.length,
+        pages: Number.isInteger(payload.pages) ? payload.pages : 1,
+        has_next: Boolean(payload.has_next),
+        has_prev: Boolean(payload.has_prev),
       };
     });
     builder.addCase(fetchProducts.rejected, (state, action) => {

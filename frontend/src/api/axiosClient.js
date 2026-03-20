@@ -9,7 +9,20 @@
  */
 import axios from "axios";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
+function resolveApiBaseUrl() {
+  const raw = (process.env.REACT_APP_API_URL || "").trim();
+  if (!raw) return "/api";
+
+  // If a full host URL is provided without "/api", append it.
+  if (/^https?:\/\//i.test(raw)) {
+    const normalized = raw.replace(/\/+$/, "");
+    return normalized.endsWith("/api") ? normalized : `${normalized}/api`;
+  }
+
+  return raw;
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,

@@ -18,6 +18,7 @@ import {
   selectProducts,
   selectProductsPagination,
   selectProductsLoading,
+  selectProductsError,
   selectFilters,
   selectCategories,
   selectBrands,
@@ -31,6 +32,7 @@ export default function ProductListPage() {
   const products = useSelector(selectProducts);
   const pagination = useSelector(selectProductsPagination);
   const loading = useSelector(selectProductsLoading);
+  const productsError = useSelector(selectProductsError);
   const filters = useSelector(selectFilters);
   const categories = useSelector(selectCategories);
   const brands = useSelector(selectBrands);
@@ -212,6 +214,10 @@ export default function ProductListPage() {
         {loading ? (
           <div className="product-list-page__loading">
             <FaSpinner className="spinner" /> Loading products...
+          </div>
+        ) : productsError ? (
+          <div className="product-list-page__empty">
+            <p>Could not load products. Check API URL/config and try again.</p>
           </div>
         ) : products.length === 0 ? (
           <div className="product-list-page__empty">
