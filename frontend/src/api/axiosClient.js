@@ -94,7 +94,27 @@ const processQueue = (error, token = null) => {
  * the refresh completes.
  */
 axiosClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const { data } = response;
+    if (
+      typeof data === "string" &&
+      /<!doctype html/i.test(data.slice(0, 512))
+    ) {
+      return Promise.reject({
+        response: {
+          status: 502,
+          data: {
+            error: "API misconfigured",
+            message:
+              "Received HTML instead of JSON. Set REACT_APP_API_URL to your Flask backend URL (not the React app URL), rebuild, and redeploy.",
+          },
+        },
+        config: response.config,
+        isAxiosError: true,
+      });
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
 
