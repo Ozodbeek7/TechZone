@@ -1,0 +1,12 @@
+# Railway: Root Directory = `frontend`. Forces Nixpacks (production build + serve),
+# so the dev-oriented Dockerfile in this folder is not used on Railway.
+# Config path if needed: `/frontend/railway.toml`
+[build]
+builder = "NIXPACKS"
+watchPatterns = ["frontend/**"]
+
+[deploy]
+startCommand = "npm run start:prod"
+healthcheckPath = "/"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"

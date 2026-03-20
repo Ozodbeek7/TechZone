@@ -1,15 +1,19 @@
 """
 TechZone Flask Application Factory
 """
-from flask import Flask
+import os
+
+from flask import Flask, jsonify
 from flask_cors import CORS
 
 from .config import config_by_name
 from .extensions import db, migrate, jwt, mail, ma
 
 
-def create_app(config_name: str = "development") -> Flask:
+def create_app(config_name: str | None = None) -> Flask:
     """Create and configure the Flask application."""
+    if config_name is None:
+        config_name = os.getenv("FLASK_ENV", "development")
     app = Flask(__name__)
     config_class = config_by_name[config_name]
     app.config.from_object(config_class)
@@ -30,6 +34,10 @@ def create_app(config_name: str = "development") -> Flask:
 
     # Register CLI commands
     _register_cli_commands(app)
+
+    @app.route("/health")
+    def health():
+        return jsonify({"status": "ok"})
 
     return app
 

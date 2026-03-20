@@ -1,0 +1,12 @@
+# Railway: set Service → Settings → Root Directory = `backend`
+# If the repo root is used as context, set Config-as-code path to `/backend/railway.toml`
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+watchPatterns = ["backend/**"]
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+preDeployCommand = ["flask", "db", "upgrade"]
