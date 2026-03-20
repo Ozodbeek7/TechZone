@@ -36,15 +36,13 @@ Set these Railway environment variables:
 ## 2) Frontend Service (`frontend`)
 
 - Service root: `frontend`
-- Install command: `npm install`
-- Build command: `npm run build`
-- Start command: `npm run start:prod`
+- Build: `frontend/Dockerfile` (multi-stage: `npm run build` + `serve` on `0.0.0.0:$PORT`)
 
 Set:
 
 - `REACT_APP_API_URL=<backend-public-url>` (with or without `/api`; the app normalizes it)
 
-**Critical:** Create React App bakes `REACT_APP_*` at **build** time. Add `REACT_APP_API_URL` under **Variables**, enable it for the **build** phase if Railway offers “Available at Build Time” / similar, then redeploy so `npm run build` runs again. Example value: `https://your-backend-service.up.railway.app` (no trailing slash required; `/api` is appended in code). If this variable is missing at build time, the bundle uses relative `/api` on the frontend host — products and auth will fail.
+**Critical:** Create React App bakes `REACT_APP_*` at **build** time. Add `REACT_APP_API_URL` as a service variable and include it in the **Docker build** (Railway UI: variable → “Add to Dockerfile” / build-time), then redeploy so the image rebuilds. The `Dockerfile` declares `ARG REACT_APP_API_URL` for this. Example value: `https://your-backend-service.up.railway.app`. If it is missing at build time, the SPA falls back to relative `/api` on the frontend host — API calls will fail.
 
 Backend `CORS_ORIGINS` must match the exact frontend URL (scheme + host, no trailing slash), comma-separated if multiple.
 
