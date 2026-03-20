@@ -51,7 +51,8 @@ Backend `CORS_ORIGINS` must match the exact frontend URL (scheme + host, no trai
 ## 3) Post-deploy checks
 
 - Open backend URL and verify `GET /health` returns `{"status":"ok"}`.
-- Open backend URL and verify `/api/products` returns JSON.
+- Open backend URL and verify `/api/products` returns JSON with an `items` array (may be empty until you add data).
+- **Empty catalog:** from a shell attached to the backend service (or locally with `DATABASE_URL` set), run `flask seed` to create categories, brands, and an admin user — then add products via API/admin or your own seed step.
 - Open frontend URL and verify product list loads.
 - Verify login/register requests hit backend domain (network tab).
 - Confirm backend `CORS_ORIGINS` exactly includes frontend URL.
