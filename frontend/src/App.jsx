@@ -1,8 +1,9 @@
 import React from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import Navbar from "./components/Navbar";
+import HomePage from "./pages/HomePage";
 import ProductListPage from "./pages/ProductListPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import CategoriesPage from "./pages/CategoriesPage";
@@ -12,6 +13,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import { Link } from "react-router-dom";
 import { selectCartItems } from "./store/slices/cartSlice";
+import PriceDisplay from "./components/PriceDisplay";
 
 function CartPage() {
   const items = useSelector(selectCartItems);
@@ -32,9 +34,9 @@ function CartPage() {
             <li key={item.id} className="cart-page__item">
               <span className="cart-page__name">{item.name}</span>
               <span className="cart-page__qty">× {item.quantity}</span>
-              <span className="cart-page__price">
-                ${(Number(item.price) * item.quantity).toFixed(2)}
-              </span>
+              <div className="cart-page__prices">
+                <PriceDisplay usd={Number(item.price) * item.quantity} />
+              </div>
             </li>
           ))}
         </ul>
@@ -58,7 +60,7 @@ export default function App() {
     <>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Navigate to="/products" replace />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/products" element={<ProductListPage />} />
         <Route path="/products/:productId" element={<ProductDetailPage />} />
         <Route path="/search" element={<ProductListPage />} />

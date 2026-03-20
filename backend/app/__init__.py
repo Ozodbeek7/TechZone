@@ -137,6 +137,8 @@ def _register_cli_commands(app: Flask) -> None:
             {"name": "Components", "slug": "components", "description": "PC components and parts"},
             {"name": "Storage", "slug": "storage", "description": "SSDs, HDDs, and external storage"},
             {"name": "Networking", "slug": "networking", "description": "Routers, switches, and networking gear"},
+            {"name": "Wearables", "slug": "wearables", "description": "Smartwatches, bands, and fitness wearables"},
+            {"name": "Sport Tech", "slug": "sport-tech", "description": "Sports electronics and training gear"},
         ]
 
         for cat_data in categories_data:
@@ -159,6 +161,11 @@ def _register_cli_commands(app: Flask) -> None:
             {"name": "Bose", "slug": "bose", "description": "Audio equipment and speakers"},
             {"name": "NVIDIA", "slug": "nvidia", "description": "GPUs and AI computing"},
             {"name": "Logitech", "slug": "logitech", "description": "Peripherals and streaming gear"},
+            {"name": "Nike", "slug": "nike", "description": "Sport performance and wearable accessories"},
+            {"name": "Adidas", "slug": "adidas", "description": "Sport audio and connected fitness"},
+            {"name": "Xiaomi", "slug": "xiaomi", "description": "Smartphones and smart ecosystem"},
+            {"name": "OnePlus", "slug": "oneplus", "description": "Flagship killer smartphones"},
+            {"name": "Microsoft", "slug": "microsoft", "description": "Surface, software, and cloud"},
         ]
 
         for brand_data in brands_data:

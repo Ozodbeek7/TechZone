@@ -29,8 +29,11 @@ def validate_password(password: str) -> None:
         errors.append("Password must contain at least one lowercase letter.")
     if not re.search(r"\d", password):
         errors.append("Password must contain at least one digit.")
-    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
-        errors.append("Password must contain at least one special character.")
+    if not re.search(r"[-!@#$%^&*(),.?\":{}|<>_=]", password):
+        errors.append(
+            "Password must contain at least one special character "
+            "(e.g. ! @ # - _ *)."
+        )
 
     if errors:
         raise ValidationError(errors)

@@ -27,7 +27,9 @@ import {
 } from "../store/slices/productSlice";
 import { addToCart, selectIsInCart } from "../store/slices/cartSlice";
 import ReviewCard from "../components/ReviewCard";
+import PriceDisplay from "../components/PriceDisplay";
 import productApi from "../api/productApi";
+import { formatUsd, formatUzs } from "../utils/money";
 
 export default function ProductDetailPage() {
   const { productId } = useParams();
@@ -182,15 +184,20 @@ export default function ProductDetailPage() {
 
           {/* Price */}
           <div className="product-detail__price-section">
-            <span className="product-detail__price">${product.price.toFixed(2)}</span>
+            <PriceDisplay usd={product.price} className="price-display--large" />
             {product.compare_at_price && (
-              <span className="product-detail__compare-price">
-                ${product.compare_at_price.toFixed(2)}
-              </span>
+              <div className="product-detail__compare-stack">
+                <span className="product-detail__compare-price">
+                  {formatUsd(product.compare_at_price)}
+                </span>
+                <span className="product-detail__compare-uzs">
+                  {formatUzs(product.compare_at_price)}
+                </span>
+              </div>
             )}
             {product.discount_percentage && (
               <span className="product-detail__discount-badge">
-                Save {product.discount_percentage}%
+                −{product.discount_percentage}%
               </span>
             )}
           </div>

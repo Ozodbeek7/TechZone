@@ -81,6 +81,9 @@ export default function Navbar() {
 
         {/* Desktop nav links */}
         <div className={`navbar__links ${mobileMenuOpen ? "navbar__links--open" : ""}`}>
+          <Link to="/" className="navbar__link" onClick={() => setMobileMenuOpen(false)}>
+            Home
+          </Link>
           <Link to="/products" className="navbar__link" onClick={() => setMobileMenuOpen(false)}>
             Products
           </Link>

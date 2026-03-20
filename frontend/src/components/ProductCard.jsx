@@ -10,6 +10,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { FaStar, FaShoppingCart, FaHeart } from "react-icons/fa";
 
 import { addToCart, selectIsInCart } from "../store/slices/cartSlice";
+import PriceDisplay from "./PriceDisplay";
+import { formatUsd, formatUzs } from "../utils/money";
 
 export default function ProductCard({ product }) {
   const dispatch = useDispatch();
@@ -87,15 +89,18 @@ export default function ProductCard({ product }) {
             </div>
           )}
 
-          {/* Price */}
+          {/* Price — USD (API) + UZS (derived) */}
           <div className="product-card__price-row">
-            <span className="product-card__price">
-              ${product.price.toFixed(2)}
-            </span>
+            <PriceDisplay usd={product.price} />
             {product.compare_at_price && (
-              <span className="product-card__compare-price">
-                ${product.compare_at_price.toFixed(2)}
-              </span>
+              <div className="product-card__compare-wrap">
+                <span className="product-card__compare-price">
+                  {formatUsd(product.compare_at_price)}
+                </span>
+                <span className="product-card__compare-uzs">
+                  {formatUzs(product.compare_at_price)}
+                </span>
+              </div>
             )}
           </div>
         </div>

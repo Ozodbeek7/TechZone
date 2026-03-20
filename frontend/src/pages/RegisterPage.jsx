@@ -24,21 +24,26 @@ import {
   selectAuthError,
 } from "../store/slices/authSlice";
 
+/** Must match backend `validate_password` (see backend/app/utils/validators.py). */
+const PASSWORD_SPECIAL_RE = /[-!@#$%^&*(),.?":{}|<>_=]/;
+
 /**
- * Compute a password strength score from 0-4.
+ * Strength 0–5: each of length (8+), upper, lower, digit, special counts as one.
  */
 function getPasswordStrength(password) {
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[a-z]/.test(password)) score++;
-  if (/\d/.test(password)) score++;
-  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
-  return Math.min(score, 4);
+  if (!password) return 0;
+  const checks = [
+    password.length >= 8,
+    /[A-Z]/.test(password),
+    /[a-z]/.test(password),
+    /\d/.test(password),
+    PASSWORD_SPECIAL_RE.test(password),
+  ];
+  return checks.filter(Boolean).length;
 }
 
-const strengthLabels = ["", "Weak", "Fair", "Good", "Strong"];
-const strengthColors = ["", "#e74c3c", "#e67e22", "#f1c40f", "#27ae60"];
+const strengthLabels = ["", "Weak", "Fair", "Good", "Great", "Strong"];
+const strengthColors = ["", "#e74c3c", "#e67e22", "#f1c40f", "#3498db", "#27ae60"];
 
 export default function RegisterPage() {
   const dispatch = useDispatch();
@@ -98,9 +103,9 @@ export default function RegisterPage() {
 
     if (!formData.password) {
       newErrors.password = "Password is required.";
-    } else if (getPasswordStrength(formData.password) < 3) {
+    } else if (getPasswordStrength(formData.password) < 5) {
       newErrors.password =
-        "Password must be at least 8 characters with uppercase, lowercase, digit, and special character.";
+        "Use at least 8 characters with uppercase, lowercase, a number, and a special character (! @ # - _ * and similar).";
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -234,12 +239,16 @@ export default function RegisterPage() {
               autoComplete="new-password"
               disabled={loading}
             />
+            <p className="register-page__hint">
+              At least 8 characters, A–Z, a–z, 0–9, and one of:{" "}
+              <code className="register-page__code">- ! @ # $ % ^ &amp; * ( ) , . ? &quot; : {"{"}{"}"} | &lt; &gt; _ =</code>
+            </p>
             {formData.password && (
               <div className="register-page__strength">
                 <div
                   className="register-page__strength-bar"
                   style={{
-                    width: `${(passwordStrength / 4) * 100}%`,
+                    width: `${(passwordStrength / 5) * 100}%`,
                     backgroundColor: strengthColors[passwordStrength],
                   }}
                 />

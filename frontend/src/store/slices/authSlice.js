@@ -6,6 +6,7 @@
  */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authApi from "../../api/authApi";
+import formatApiError from "../../utils/formatApiError";
 
 // ----------------------------------------------------------------
 // Async thunks
@@ -127,7 +128,7 @@ const authSlice = createSlice({
     });
     builder.addCase(register.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload?.error || "Registration failed.";
+      state.error = formatApiError(action.payload);
     });
 
     // Login
@@ -142,7 +143,7 @@ const authSlice = createSlice({
     });
     builder.addCase(login.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload?.error || "Login failed.";
+      state.error = formatApiError(action.payload);
     });
 
     // Fetch profile
@@ -171,7 +172,7 @@ const authSlice = createSlice({
     });
     builder.addCase(updateProfile.rejected, (state, action) => {
       state.profileLoading = false;
-      state.error = action.payload?.error || "Profile update failed.";
+      state.error = formatApiError(action.payload);
     });
   },
 });
