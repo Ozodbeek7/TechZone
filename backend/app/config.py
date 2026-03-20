@@ -115,6 +115,8 @@ class ProductionConfig(BaseConfig):
     SECRET_KEY = os.getenv("SECRET_KEY")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = _normalize_database_url(os.getenv("DATABASE_URL"))
+    # Omit ES unless explicitly configured (Base default localhost breaks search health on PaaS)
+    ELASTICSEARCH_URL = os.getenv("ELASTICSEARCH_URL") or None
     SQLALCHEMY_ENGINE_OPTIONS = {
         **BaseConfig.SQLALCHEMY_ENGINE_OPTIONS,
         "pool_size": 20,

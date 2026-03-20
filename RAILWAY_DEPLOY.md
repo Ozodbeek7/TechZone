@@ -30,6 +30,8 @@ Set these Railway environment variables:
 - `REDIS_URL=<Railway Redis URL>` (optional but recommended)
 - `CELERY_BROKER_URL=<redis-url>` (optional if running workers)
 - `CELERY_RESULT_BACKEND=<redis-url>` (optional if running workers)
+- `ELASTICSEARCH_URL` — omit on Railway unless you run Elasticsearch; search falls back to SQL
+- `REDIS_URL` — optional; without it, defaults target localhost (add Railway Redis or a valid URL for cache/Celery)
 - `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`, `MAIL_PASSWORD` (if email features are used)
 - `STRIPE_PUBLIC_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (if payments are used)
 

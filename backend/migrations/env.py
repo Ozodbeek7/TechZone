@@ -1,42 +1,36 @@
 """
-Alembic Migrations Environment Configuration
+Alembic environment (Flask-SQLAlchemy).
 """
 import os
-import sys
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
-
-# Ensure the app package is importable
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from sqlalchemy import pool
+from sqlalchemy import engine_from_config
 
 from app import create_app
 from app.extensions import db
 
-# Alembic Config object
+# Register models on db.metadata
+import app.models  # noqa: F401
+
 config = context.config
 
-# Logging configuration
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Create the Flask app to get config values
 flask_app = create_app(os.getenv("FLASK_ENV", "development"))
-
-# Set the SQLAlchemy URL from the Flask app config
-config.set_main_option("sqlalchemy.url", flask_app.config["SQLALCHEMY_DATABASE_URI"])
-
-# Target metadata for autogenerate
 target_metadata = db.metadata
 
 
-def run_migrations_offline() -> None:
-    """
-    Run migrations in 'offline' mode.
+def get_database_url() -> str:
+    return str(flask_app.config["SQLALCHEMY_DATABASE_URI"])
 
-    This generates SQL scripts instead of connecting to a live database.
-    """
+
+config.set_main_option("sqlalchemy.url", get_database_url().replace("%", "%%"))
+
+
+def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -50,13 +44,10 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """
-    Run migrations in 'online' mode.
-
-    Creates an engine and connects to the database to apply migrations.
-    """
+    cfg = config.get_section(config.config_ini_section, {})
+    cfg["sqlalchemy.url"] = get_database_url()
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        cfg,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
@@ -66,7 +57,6 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             compare_type=True,
-            compare_server_default=True,
         )
 
         with context.begin_transaction():

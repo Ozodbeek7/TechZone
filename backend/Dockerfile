@@ -18,6 +18,8 @@ COPY . .
 # Create uploads directory
 RUN mkdir -p /app/uploads
 
+ENV FLASK_APP=run.py
+
 EXPOSE 5000
 
 CMD ["sh", "-c", "gunicorn -w 4 -b 0.0.0.0:${PORT:-5000} run:app"]

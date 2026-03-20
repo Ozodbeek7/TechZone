@@ -45,7 +45,8 @@ def create_app(config_name: str | None = None) -> Flask:
 def _register_extensions(app: Flask) -> None:
     """Register Flask extensions."""
     db.init_app(app)
-    migrate.init_app(app, db)
+    _backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    migrate.init_app(app, db, directory=os.path.join(_backend_root, "migrations"))
     jwt.init_app(app)
     mail.init_app(app)
     ma.init_app(app)

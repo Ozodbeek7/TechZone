@@ -1,0 +1,3 @@
+Alembic migrations for TechZone. Run from `backend/` with `FLASK_APP=run.py`:
+
+  flask db upgrade
